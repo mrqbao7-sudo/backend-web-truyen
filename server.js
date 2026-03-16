@@ -97,14 +97,15 @@ cron.schedule('0 0 * * *', async () => {
   scheduled: true,
   timezone: "Asia/Ho_Chi_Minh" 
 });
-// API Dành cho Admin: Cập nhật lại nội dung chương truyện
+// API Dành cho Admin: Cập nhật lại nội dung VÀ TIÊU ĐỀ chương truyện
 app.put('/api/chapters/:id', async (req, res) => {
   try {
-    const id = req.params.id; // Lấy ID của chương cần sửa
-    const noiDungMoi = req.body.content; // Lấy nội dung mới do bạn gõ
+    const id = req.params.id; 
+    const noiDungMoi = req.body.content; 
+    const tieuDeMoi = req.body.title; // Thêm dòng này để lấy tiêu đề mới
 
-    // Cập nhật vào Database
-    await pool.query('UPDATE chapters SET content = $1 WHERE id = $2', [noiDungMoi, id]);
+    // Cập nhật cả 2 vào Database
+    await pool.query('UPDATE chapters SET title = $1, content = $2 WHERE id = $3', [tieuDeMoi, noiDungMoi, id]);
     
     res.json({ message: 'Cập nhật thành công!' });
   } catch (error) {
