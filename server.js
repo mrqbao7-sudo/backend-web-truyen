@@ -97,6 +97,31 @@ cron.schedule('0 0 * * *', async () => {
   scheduled: true,
   timezone: "Asia/Ho_Chi_Minh" 
 });
+// API Lấy chi tiết 1 chương để đọc (kèm link chương trước/sau)
+app.get('/api/chapters/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    // Lấy nội dung chương hiện tại
+    const currentChap = await pool.query('SELECT * FROM chapters WHERE id = $1', [id]);
+    if (currentChap.rows.length === 0) return res.status(404).json({ error: 'Không tìm thấy chương' });
+    
+    const current = currentChap.rows[0];
+
+    // Tìm chương trước đó
+    const prevChap = await pool.query('SELECT id FROM chapters WHERE novel_id = $1 AND chapter_number < $2 ORDER BY chapter_number DESC LIMIT 1', [current.novel_id, current.chapter_number]);
+    
+    // Tìm chương tiếp theo
+    const nextChap = await pool.query('SELECT id FROM chapters WHERE novel_id = $1 AND chapter_number > $2 ORDER BY chapter_number ASC LIMIT 1', [current.novel_id, current.chapter_number]);
+
+    res.json({
+      current: current,
+      prevId: prevChap.rows.length > 0 ? prevChap.rows[0].id : null,
+      nextId: nextChap.rows.length > 0 ? nextChap.rows[0].id : null
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Lỗi khi tải chương truyện' });
+  }
+});
 // API Dành cho Admin: Cập nhật lại nội dung VÀ TIÊU ĐỀ chương truyện
 app.put('/api/chapters/:id', async (req, res) => {
   try {
