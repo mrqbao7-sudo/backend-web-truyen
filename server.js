@@ -44,7 +44,7 @@ app.get('/api/ai/viet-chuong', async (req, res) => {
     Độ dài khoảng 800 - 1200 từ. Trình bày bằng tiếng Việt, có chia đoạn văn rõ ràng, văn phong lôi cuốn, kịch tính. Chỉ trả về nội dung truyện, không cần giải thích thêm.`;
 
     // Gọi Gemini AI
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
     const result = await model.generateContent(prompt);
     const aiContent = result.response.text();
 
