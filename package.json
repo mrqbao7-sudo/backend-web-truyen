@@ -1,0 +1,17 @@
+{
+  "name": "backend-web-truyen",
+  "version": "1.0.0",
+  "description": "Backend cho web đọc truyện",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "node-cron": "^3.0.2",
+    "openai": "^4.11.0",
+    "pg": "^8.11.3"
+  }
+}
