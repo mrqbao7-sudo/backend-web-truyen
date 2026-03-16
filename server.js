@@ -61,7 +61,42 @@ app.get('/api/ai/viet-chuong', async (req, res) => {
     res.status(500).send('Có lỗi xảy ra: ' + error.message);
   }
 });
+const cron = require('node-cron');
 
+// Lên lịch tự động chạy vào lúc 00:00 (nửa đêm) mỗi ngày
+cron.schedule('0 0 * * *', async () => {
+  console.log('Bắt đầu quy trình tự động viết truyện đêm khuya...');
+  try {
+    const novel = await pool.query('SELECT * FROM novels WHERE id = 1');
+    const summary = novel.rows[0].summary;
+    const title = novel.rows[0].title;
+
+    const countQuery = await pool.query('SELECT COUNT(*) FROM chapters WHERE novel_id = 1');
+    const nextChapterNum = parseInt(countQuery.rows[0].count) + 1;
+
+    const prompt = `Bạn là một đại thần viết truyện võng du/tiên hiệp. Hãy viết Chương ${nextChapterNum} cho bộ truyện mang tên "${title}" dựa trên tóm tắt sau: "${summary}". 
+    Độ dài khoảng 800 - 1200 từ. Trình bày bằng tiếng Việt, có chia đoạn văn rõ ràng, văn phong lôi cuốn, kịch tính. Chỉ trả về nội dung truyện, không cần giải thích thêm.`;
+
+    // Nhớ dùng đúng model 2.5-flash mà bạn vừa test thành công nhé
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const result = await model.generateContent(prompt);
+    const aiContent = result.response.text();
+
+    const chapterTitle = `Chương ${nextChapterNum}: (AI Tự Đặt Tên)`;
+
+    await pool.query(
+      'INSERT INTO chapters (novel_id, chapter_number, title, content) VALUES ($1, $2, $3, $4)',
+      [1, nextChapterNum, chapterTitle, aiContent]
+    );
+
+    console.log(`Đã tự động viết và đăng thành công Chương ${nextChapterNum}!`);
+  } catch (error) {
+    console.error('Lỗi khi AI tự viết truyện:', error.message);
+  }
+}, {
+  scheduled: true,
+  timezone: "Asia/Ho_Chi_Minh" 
+});
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Server đang chạy ở port ${PORT}`);
