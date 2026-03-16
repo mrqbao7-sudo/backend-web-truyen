@@ -97,6 +97,20 @@ cron.schedule('0 0 * * *', async () => {
   scheduled: true,
   timezone: "Asia/Ho_Chi_Minh" 
 });
+// API Dành cho Admin: Cập nhật lại nội dung chương truyện
+app.put('/api/chapters/:id', async (req, res) => {
+  try {
+    const id = req.params.id; // Lấy ID của chương cần sửa
+    const noiDungMoi = req.body.content; // Lấy nội dung mới do bạn gõ
+
+    // Cập nhật vào Database
+    await pool.query('UPDATE chapters SET content = $1 WHERE id = $2', [noiDungMoi, id]);
+    
+    res.json({ message: 'Cập nhật thành công!' });
+  } catch (error) {
+    res.status(500).json({ error: 'Lỗi khi cập nhật chương' });
+  }
+});
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Server đang chạy ở port ${PORT}`);
